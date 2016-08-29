@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>扫码</title>
+	<style>
+		table {
+			border-collapse: collapse
+		}
+		td, th{
+			border: 1px solid gray;
+		}
+	</style>
+</head>
+<body>
+<div id="main">
+	<div v-show="isNew">
+		<div>
+			姓名：<input type="text" v-model="name">
+		</div>
+		<div>
+			<button @click="signin">注册并签到</button>
+		</div>
+	</div>
+	<div>
+		信息：<span v-text="msg"></span>
+	</div>
+
+	<div>
+		<h3>签到记录</h3>
+		<button @click="listSigninLog">刷新</button>
+		<table>
+			<tr>
+				<th>姓名</th>
+				<th>时间</th>
+			</tr>
+			<tr v-for="obj in signinlog">
+				<td v-text="obj.name"></td>
+				<td v-text="obj.time"></td>
+			</tr>
+		</table>
+	</div>
+</div>
+</body>
+<script src="/javascripts/vue.min.js"></script>
+<script src="/javascripts/vue-resource.min.js"></script>
+<script>
+	var vm_main = new Vue({
+		el: '#main',
+		data:{
+			qrcode: '',
+			isNew: false,
+			name: '',
+			msg: '',
+			signinlog:[]
+		}, computed: {
+			id: {
+				get: function () {
+					return localStorage.id;
+				}, set: function (id) {
+					localStorage.id = id;
+				}
+			},
+			isNew: function () {
+				return !this.id;
+			}
+		}, methods: {
+			signin: function () {
+				this.msg = null;
+				if(this.isNew){
+					var name = this.name;
+					if(name.trim().length == 0){
+						return this.msg = '姓名长度不能为0';
+					}
+					if(name.indexOf('*') > -1){
+						return this.msg = '名字不能包含特殊符号';
+					}
+					if(!confirm('一旦确认不能修改')){
+						return;
+					}
+					this.id = name + '*' + Date.now();
+				}
+				this.$http.post('/signin/' + this.id, {deviceInfo: this.getDeviceInfo()}).then(function (res) {
+					var data = res.data;
+					this.msg = data;
+				});
+			},
+			listSigninLog: function () {
+				this.$http.get('/listSigninLog').then(function (res) {
+					var data = res.data;
+					data.forEach(function (obj) {
+						obj.name = obj.id.split('*')[0];
+						obj.time = new Date(obj.time).toLocaleString();
+					});
+					this.signinlog = data.reverse();
+				});
+			},
+			getDeviceInfo: function () {
+				return {
+					platform: navigator.platform,
+					vendor: navigator.vendor,
+					screenHeight: screen.height,
+					screenWidth: screen.width
+				}
+			}
+		}, ready: function () {
+			if(!this.isNew){
+				this.signin();
+			}
+		}
+	});
+</script>
+</html>
