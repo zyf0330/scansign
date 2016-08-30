@@ -57,7 +57,7 @@
 				get: function () {
 					return localStorage.getItem('id');
 				}, set: function (id) {
-					localStorage.setItem('id');
+					localStorage.setItem('id', id);
 				}
 			},
 			isNew: function () {
@@ -82,6 +82,11 @@
 				this.$http.post('/signin/' + this.id, {deviceInfo: this.getDeviceInfo()}).then(function (res) {
 					var data = res.data;
 					this.msg = data;
+					if(data.indexOf('success') > -1){
+						setTimeout(function(){
+							window.location.replace("data:text/html,success");
+						}, 1500);
+					}
 				});
 			},
 			listSigninLog: function () {
