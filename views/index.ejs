@@ -55,9 +55,9 @@
 		}, computed: {
 			id: {
 				get: function () {
-					return localStorage.id;
+					return localStorage.getItem('id');
 				}, set: function (id) {
-					localStorage.id = id;
+					localStorage.setItem('id');
 				}
 			},
 			isNew: function () {
