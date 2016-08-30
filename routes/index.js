@@ -49,12 +49,12 @@ router.get('/updateIp', function (req, res, next) {
  * 签到
  */
 router.post('/signin/:id', function (req, res, next) {
-	if(!ip) {
-		return res.send('公司wifi是否正常工作');
-	}
-	if(ip6to4(req.ip) != ip){
-		return res.send('连接到公司wifi扫码');
-	}
+	// if(!ip) {
+	// 	return res.send('公司wifi是否正常工作');
+	// }
+	// if(ip6to4(req.ip) != ip){
+	// 	return res.send('连接到公司wifi扫码');
+	// }
 	var id = req.params.id;
 	var deviceInfo = req.body.deviceInfo;
 	var name = id.split('*')[0];
@@ -85,12 +85,22 @@ router.post('/signin/:id', function (req, res, next) {
 				_signin();
 			}
 			function _signin() {
-				Signinlog.create(id, function (err) {
+				Signinlog.findByIdAndTohalfday(id, function(err, log){
 					if(err){
-						err.message = '签到失败';
 						next(err);
 					}else{
-						res.send('success !!!');
+						if(!log){
+							Signinlog.create(id, function (err) {
+								if(err){
+									err.message = '签到失败';
+									next(err);
+								}else{
+									res.send('success !!!');
+								}
+							});
+						}else{
+							res.send('8小时内不能重复签到');
+						}
 					}
 				});
 			}
@@ -161,6 +171,28 @@ var User = {
 						o.time = new Date(+o.time);
 					});
 					cb(null, logs);
+				}
+			});
+		},
+		//8小时内的记录
+		findByIdAndTohalfday: function (id, cb) {
+			Signinlog.list(function (err, logs) {
+				if(err){
+					cb(err);
+				}else{
+					logs = logs.reverse();
+					if(logs.length == 0){
+						return cb(null, null);
+					}
+					for(var i in logs){
+						if(logs[i].id == id){
+							if(logs[i].time.getTime() + 8 * 3600000 > Date.now()){
+								return cb(null, logs[i]);
+							}else{
+								return cb(null, null);
+							}
+						}
+					}
 				}
 			});
 		}
