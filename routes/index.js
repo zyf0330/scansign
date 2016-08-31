@@ -49,12 +49,12 @@ router.get('/updateIp', function (req, res, next) {
  * 签到
  */
 router.post('/signin/:id', function (req, res, next) {
-	// if(!ip) {
-	// 	return res.send('公司wifi是否正常工作');
-	// }
-	// if(ip6to4(req.ip) != ip){
-	// 	return res.send('连接到公司wifi扫码');
-	// }
+	if(!ip) {
+		return res.send('公司wifi是否正常工作');
+	}
+	if(ip6to4(req.ip) != ip){
+		return res.send('连接到公司wifi扫码');
+	}
 	var id = req.params.id;
 	var deviceInfo = req.body.deviceInfo;
 	var name = id.split('*')[0];
@@ -181,9 +181,6 @@ var User = {
 					cb(err);
 				}else{
 					logs = logs.reverse();
-					if(logs.length == 0){
-						return cb(null, null);
-					}
 					for(var i in logs){
 						if(logs[i].id == id){
 							if(logs[i].time.getTime() + 8 * 3600000 > Date.now()){
@@ -193,6 +190,7 @@ var User = {
 							}
 						}
 					}
+					cb(null, null);
 				}
 			});
 		}
