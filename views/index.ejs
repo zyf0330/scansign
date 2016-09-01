@@ -55,6 +55,7 @@
 			signinlog:[]
 		}, computed: {
 			id: {
+				cache: false,
 				get: function () {
 					return localStorage.getItem('id');
 				}, set: function (id) {
