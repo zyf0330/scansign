@@ -68,6 +68,7 @@
 		}, methods: {
 			signin: function () {
 				this.msg = null;
+				var id = this.id;
 				if(this.isNew){
 					var name = this.name;
 					if(name.trim().length == 0){
@@ -79,9 +80,9 @@
 					if(!confirm('一旦确认不能修改')){
 						return;
 					}
-					this.id = name + '*' + Date.now();
+					id = this.id = name + '*' + Date.now();
 				}
-				this.$http.post('/signin/' + this.id, {deviceInfo: this.getDeviceInfo()}).then(function (res) {
+				this.$http.post('/signin/' + id, {deviceInfo: this.getDeviceInfo()}).then(function (res) {
 					var data = res.data;
 					this.msg = data;
 					if(data.indexOf('success') > -1){
